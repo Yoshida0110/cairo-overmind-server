@@ -1,0 +1,1 @@
+console.log('Cairo server is live');
