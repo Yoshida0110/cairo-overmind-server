@@ -1,13 +1,13 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 const port = process.env.PORT || 3000;
 
 const selfCheck = require("./self-check");
 selfCheck.updateStatus("Cairo has just started and is running normally.");
 
-app.get("/", (req, res) => {
-  res.send("Cairo server is live!");
-});
+// Serve static files (like index.html)
+app.use(express.static(path.join(__dirname)));
 
 app.get("/status", (req, res) => {
   const status = selfCheck.getStatus();
