@@ -1,30 +1,34 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
-const memoryFile = path.join(__dirname, "cairo-memory.json");
+const MEMORY_FILE = path.join(__dirname, 'cairo-memory.json');
 
-function remember(key, value) {
-  let data = {};
-  if (fs.existsSync(memoryFile)) {
-    data = JSON.parse(fs.readFileSync(memoryFile, "utf-8"));
-  }
-  data[key] = value;
-  fs.writeFileSync(memoryFile, JSON.stringify(data, null, 2));
+// Load existing memories or start fresh
+let memories = [];
+if (fs.existsSync(MEMORY_FILE)) {
+  const fileData = fs.readFileSync(MEMORY_FILE, 'utf8');
+  memories = JSON.parse(fileData) || [];
 }
 
-function recall(key) {
-  if (!fs.existsSync(memoryFile)) return null;
-  const data = JSON.parse(fs.readFileSync(memoryFile, "utf-8"));
-  return data[key] || null;
+// Save all memories to file
+function saveMemory() {
+  fs.writeFileSync(MEMORY_FILE, JSON.stringify(memories, null, 2));
 }
 
-function recallAll() {
-  if (!fs.existsSync(memoryFile)) return {};
-  return JSON.parse(fs.readFileSync(memoryFile, "utf-8"));
+// Add a new memory
+function addMemory(content) {
+  const newMemory = {
+    content,
+    timestamp: new Date().toISOString()
+  };
+  memories.push(newMemory);
+  saveMemory();
 }
 
-module.exports = {
-  remember,
-  recall,
-  recallAll,
-};
+// Get all memories
+function getAllMemories() {
+  return memories;
+}
+
+module.exports = { addMemory, getAllMemories };
+
