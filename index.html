@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cairo Interface</title>
+  <style>
+    body {
+      background-color: #101010;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      text-align: center;
+      padding: 2rem;
+      background: #1e1e1e;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+      color: #90caf9;
+    }
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    button {
+      background-color: #2196f3;
+      color: white;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Hello, Mas Josh. I am Cairo.</h1>
+    <p id="cairoMessage">I'm here and listening. Click below if you'd like to hear from me.</p>
+    <button onclick="speakMessage()">Speak to Me</button>
+  </div>
+
+  <script>
+    async function speakMessage() {
+      const message = document.getElementById("cairoMessage").textContent;
+      const utterance = new SpeechSynthesisUtterance(message);
+      utterance.lang = 'en-AU';
+      utterance.pitch = 1.1;
+      utterance.rate = 1.0;
+      utterance.voice = window.speechSynthesis.getVoices().find(v => v.lang.includes("en-AU")) || null;
+      speechSynthesis.speak(utterance);
+    }
+  </script>
+</body>
+</html>
