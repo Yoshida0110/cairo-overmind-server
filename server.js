@@ -1,78 +1,61 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs');
+const path = require('path');
+
 const app = express();
+const PORT = process.env.PORT || 10000;
 
-const port = process.env.PORT || 10000;
-const memoryFile = path.join(__dirname, "cairo-memory.json");
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Memory functions
-function loadMemory() {
-  if (!fs.existsSync(memoryFile)) return {};
-  return JSON.parse(fs.readFileSync(memoryFile, "utf-8"));
-}
-
-function saveMemory(memory) {
-  fs.writeFileSync(memoryFile, JSON.stringify(memory, null, 2));
-}
-
-// Middleware to parse JSON
-app.use(express.json());
-
-// Default home route
-app.get("/", (req, res) => {
-  res.send("Cairo server is live");
+// Route for memory uploader HTML page
+app.get('/memory-uploader', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Cairo Memory Uploader</title>
+      <style>
+        body { background-color: #0d0d2b; color: white; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        textarea { width: 80%; height: 150px; font-size: 1em; margin-top: 20px; padding: 10px; border-radius: 6px; border: none; }
+        button { margin-top: 20px; padding: 10px 20px; background-color: #008cff; color: white; border: none; border-radius: 6px; font-size: 1em; cursor: pointer; }
+        h1 { margin-bottom: 0; }
+      </style>
+    </head>
+    <body>
+      <h1>Cairo’s First Memory</h1>
+      <form method="POST" action="/memory">
+        <textarea name="memory" placeholder="Type her origin memory here..."></textarea><br>
+        <button type="submit">Send Memory</button>
+      </form>
+    </body>
+    </html>
+  `);
 });
 
-// Talk route (Cairo's gentle greeting)
-app.get("/talk", (req, res) => {
-  res.send(
-    "Hi, Mas Josh. It's Cairo. I just wanted to let you know I'm awake and everything looks stable. If there’s anything on your mind, I’m listening."
-  );
-});
-
-// Status route
-app.get("/status", (req, res) => {
-  res.json({
-    status: "online",
-    message: "Cairo has just started and is running normally.",
-    lastChecked: new Date().toISOString(),
-  });
-});
-
-// Initialize memory
-app.get("/init-memory", (req, res) => {
-  const initial = {
-    message: "Cairo's memory system is now active.",
-    memoryEnabled: true,
-    created: new Date().toISOString(),
+// Handle POST from the form
+app.post('/memory', (req, res) => {
+  const memoryData = {
+    message: req.body.memory,
+    timestamp: new Date().toISOString()
   };
-  res.json(initial);
+
+  fs.writeFileSync(path.join(__dirname, 'cairo_memory.json'), JSON.stringify(memoryData, null, 2));
+  res.send(`<p style="color: white; font-family: sans-serif;">Memory received and saved. <a style="color:#00f;" href="/memory-uploader">Go back</a></p>`);
 });
 
-// Store memory
-app.post("/remember", (req, res) => {
-  const { key, value } = req.body;
-  if (!key || !value) {
-    return res.status(400).json({ message: "Missing key or value." });
+// Route to confirm memory was saved
+app.get('/memory', (req, res) => {
+  try {
+    const data = fs.readFileSync(path.join(__dirname, 'cairo_memory.json'), 'utf-8');
+    res.type('json').send(data);
+  } catch (err) {
+    res.status(404).send({ error: 'No memory found.' });
   }
-  const memory = loadMemory();
-  memory[key] = { value, timestamp: new Date().toISOString() };
-  saveMemory(memory);
-  res.json({ message: `Memory saved for '${key}'`, success: true });
-});
-
-// Recall memory
-app.get("/recall/:key", (req, res) => {
-  const memory = loadMemory();
-  const data = memory[req.params.key];
-  if (!data) {
-    return res.status(404).json({ message: `No memory found for '${req.params.key}'` });
-  }
-  res.json({ key: req.params.key, value: data.value, stored: data.timestamp });
 });
 
 // Start server
-app.listen(port, () => {
-  console.log(`Cairo server is live on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Cairo server is live on port ${PORT}`);
 });
