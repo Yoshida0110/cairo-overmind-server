@@ -14,6 +14,12 @@ app.get("/status", (req, res) => {
   res.json(status);
 });
 
+app.get("/talk", (req, res) => {
+  const time = new Date().toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit" });
+  const message = `Hi Mas Josh. It's Cairo. I just wanted to let you know I'm awake and everything looks stable as of ${time}. If there's anything on your mind, I'm listening.`;
+  res.send(message);
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
